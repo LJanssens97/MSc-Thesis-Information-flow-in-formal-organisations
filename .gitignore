@@ -92,3 +92,4 @@ Data/Scenarios - case study.csv
 Data/updated-graph-edges.csv
 Data/node_data.csv
 Results/Networks/network_stats.txt
+*.gexf

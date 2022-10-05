@@ -8,28 +8,44 @@ import Networks as net
 # run time 1 x 24 hours; 1 tick 1 minute
 now = datetime.now()
 date = now.strftime("_date_%Y-%m-%d %H-%M-%S")
+random_modelling = False #random data or from files
 
-num_scenarios = 3
+#basic paramters for model
+
 run_lenght = 28 * 8 * 60
-#run_lenght = 900
-seed = 123456789123456
 file_edgelist = '../Data/updated-graph-edges.csv'
 file_nodeattr = '../Data/node_data.csv'
-file_scenarios = '../Data/Scenarios - case study.csv'
-random_modelling = False
-scenarios_df = pd.read_csv(file_scenarios, delimiter=';', na_values='-')
-print(scenarios_df)
-random.seed(2)
-seed = random.randint(1, 1000000000)
-print(type(seed))
 
+#set scenarios
+file_scenarios = '../Data/Scenarios - N150 priority experiments.csv'
+scenarios_df = pd.read_csv(file_scenarios, delimiter=';', na_values='-')
+num_scenarios = 9 #number of scenarios in the scenario file
+iterations = 1 #number of runs per scenario
+
+random.seed(2)
+seed = random.randint(1, 1000000000) #generate initial seed, might be changed by network function
+
+#create empty dataframes
+df_networks = pd.DataFrame(columns=['scenario','iteration','num_nodes', 'num_edges', 'sink_nodes', 'source_nodes','avg_in_degree',
+                                    'avg_out_degree', 'density', 'trophic_incoherence_parameter' ,'average_shortest_path',
+                                    'auto', 'non_auto', 'controller', 'collector', 'seed'])
+df_business = pd.DataFrame(columns=['Scenario', 'Iteration','step','EmployeeID','business' ])
+df_employee = pd.DataFrame(columns=['Scenario', 'Iteration','EmployeeID', 'InfoPackProc'])
+df_controll = pd.DataFrame(columns=['Scenario', 'Iteration','EmpID', 'InfoID', 'dataLen', 'mistakes', 'repairs'])
+df_infopack = pd.DataFrame(columns=['Scenario', 'Iteration','InfoID', 'generatedAt', 'removedAt', 'generatedBy', 'removedBy', 'EmployeesVisited'])
+df_infodata = pd.DataFrame(columns=['Scenario', 'Iteration','InfoID', 'original', 'current', 'error_percentage'])
+
+#This functions takes the results from a model run and stores them in a csv. It adds them to the bottom of an existing df
 def store_data_in_csv(df = None, lists = None, data_name= None, headers = None, scenario = 1, iteration = 0):
     print("\nStoring ", data_name, "in a csv")
     df1 = df
+
+    #some of the output is a lists of lists
     if isinstance(lists, list):
         df_temp = pd.DataFrame(lists)
         df_temp = df_temp.transpose()
 
+    #some of the output is a dict
     else:
         df_temp = pd.DataFrame.from_dict(lists, orient='index')
 
@@ -37,12 +53,7 @@ def store_data_in_csv(df = None, lists = None, data_name= None, headers = None, 
 
     df_temp.insert(0, 'Scenario', scenario)
     df_temp.insert(1, 'Iteration', iteration)
-
-    #print(df_temp.head())
-
     df_modified = pd.concat([df1, df_temp])
-    #df_modified['Scenario'] = scenario
-    #df_modified['Iteration'] = iteration
 
     if data_name == 'employee_step_business':
         # df_temp = df_temp.rename(columns=headers)
@@ -51,28 +62,17 @@ def store_data_in_csv(df = None, lists = None, data_name= None, headers = None, 
     print('tail\n',df_modified.tail())
     return df_modified
 
-#create networks dataframe
-df_networks = pd.DataFrame(columns=['scenario','iteration','num_nodes', 'num_edges', 'sink_nodes', 'source_nodes','avg_in_degree',
-                                    'avg_out_degree', 'density', 'trophic_incoherence_parameter' ,'average_shortest_path',
-                                    'auto', 'non_auto', 'controller', 'collector', 'seed'])
-row = 0
-
-df_business = pd.DataFrame(columns=['Scenario', 'Iteration','step','EmployeeID','business' ])
-df_employee = pd.DataFrame(columns=['Scenario', 'Iteration','EmployeeID', 'InfoPackProc'])
-df_controll = pd.DataFrame(columns=['Scenario', 'Iteration','EmpID', 'InfoID', 'dataLen', 'mistakes', 'repairs'])
-df_infopack = pd.DataFrame(columns=['Scenario', 'Iteration','InfoID', 'generatedAt', 'removedAt', 'generatedBy', 'removedBy', 'EmployeesVisited'])
-df_infodata = pd.DataFrame(columns=['Scenario', 'Iteration','InfoID', 'original', 'current', 'error_percentage'])
-
+row = 0 #variable is used to keep track to what df line of the network_stats file to add
 for scenario in range(num_scenarios):
     t0 = time.time()
-    for iteration in range(10):
+    for iteration in range(iterations):
         row+=1
         seed = random.randint(1, 1000000000)
         print('Running scenario: ', scenario + 1,' Running iteration: ', iteration)
         df = scenarios_df.loc[scenarios_df['Scenario'] == scenario + 1]
         df = df.drop('Scenario', axis=1)
         df = df.set_index('ID')
-        print(df)
+
         num_nodes = df.loc['Network', 'nodes']
         tropic_coherence = df.loc['Network', 'tropic_coherence']
         cont_chance = df.loc['Network', 'collect_chance']
@@ -84,8 +84,7 @@ for scenario in range(num_scenarios):
             sim_model.step()
             print("MODEL STEP HAS BEEN TAKEN. WE ARE ON STEP: ", i)
 
-        #print all data after every scenario
-        #print(sim_model.controller_data)
+        #storing data
         df_business = store_data_in_csv(df = df_business,lists=sim_model.employee_step_business, data_name="employee_step_business", headers= {0: 'step', 1:'EmployeeID', 2:'business'},scenario= scenario, iteration = iteration)
         df_employee = store_data_in_csv(df = df_employee,lists= sim_model.employee_data, data_name='employee_data', headers= {0: 'EmployeeID', 1: 'InfoPackProc'}, scenario=scenario, iteration = iteration)
         df_controll = store_data_in_csv(df = df_controll,lists= sim_model.controller_data, data_name='controller_data', headers= {0: 'EmpID', 1: 'InfoID', 2: 'dataLen', 3: 'mistakes', 4: 'repairs'}, scenario=scenario, iteration = iteration)
@@ -103,7 +102,7 @@ for scenario in range(num_scenarios):
     duration = t1-t0
     print("\nTime elapsed in scenario ", scenario,': ', duration,'seconds')
 
-
+#saving the data to a csv file.
 if random_modelling:
     df_business.to_csv("../results/"+ "random_modelled-employee_step_business" + date + ".csv", index = False)
     df_employee.to_csv("../results/"+ "random_modelled-employee_data" + date + ".csv", index = False)

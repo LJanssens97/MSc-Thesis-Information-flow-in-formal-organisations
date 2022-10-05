@@ -1,5 +1,5 @@
-import copy
 
+import copy
 from mesa import Agent
 from enum import Enum
 import numpy as np
@@ -7,23 +7,10 @@ import random
 from scipy.stats import skewnorm
 
 import pandas as pd
-"""
-    Base class for all of the Employee components.
-    
-    Attributes
-    -------------
-    info_package_count : int
-        The number of info_packages that an employee still has to do
-    
-    work_precision: float 
-        The correctness of the processing. Number is between (0<1)
-    
-    work_speed: int
-        Time it takes the employee to process info packages
-    """
+
 class Employee(Agent):
     def __init__(self, unique_id, model, node_location = 'unknown', work_precision = 0.5 , work_speed = 1):
-        super().__init__(unique_id, model) #why? this is from the example.
+        super().__init__(unique_id, model)
         self.node_location = node_location #node_id
         self.info_package_processed = 0
         self.info_package_count = 0
@@ -32,6 +19,7 @@ class Employee(Agent):
         self.work_order = []
         self.model.employee_data[self.unique_id] = self.info_package_processed
 
+    #checks whether an information package may be send
     def ready_to_send(self, package_name):
         if self.work_order[len(self.work_order)-1] == package_name:
             return True
@@ -39,38 +27,26 @@ class Employee(Agent):
             return False
 
     def determine_work_order(self, new_package_type, new_package_name):
-        #print('In function DETERMINE WORK ORDER')
         if new_package_name in self.work_order:
             return
         else:
-
-            #print('Determining work order')
             # check if work_order is empty
             if not self.work_order:
-                #print('If empty workorder: ', self.work_order)
-                #self.work_order.append(new_package_name)
                 self.work_order.insert(0, new_package_name)
 
-
             else:
-                #print('If not empty workorder')
                 # check package type (priority always goes in front, normal and permission go always in back)
                 if new_package_type == 'Regular':
                     #self.work_order.append(new_package_name)
                     self.work_order.insert(0, new_package_name)
 
-
-
                 elif new_package_type == 'Priority':
                     #self.work_order.insert(0, new_package_name)
                     self.work_order.append(new_package_name)
 
-
                 elif new_package_type == 'Permission':
                     #self.work_order.append(new_package_name)
                     self.work_order.insert(0, new_package_name)
-
-
 
     #return the time it will take for a package to be processed.
     def get_processing_time(self, work_size):
@@ -93,15 +69,15 @@ class Employee(Agent):
         #if random value is smaller than chance of mutation e.g. work_precision
         if random.uniform(0.0, 1.0) < self.work_precision:
             new_data = copy.deepcopy(data_string)
-            #print('new data: ', new_data)
             bit_to_change = random.randint(0, len(data_string)-1)
             bit = data_string[bit_to_change]
+
             if bit ==1:
                 bit = 0
             else:
                 bit = 1
             new_data[bit_to_change] = bit
-            #print('\n modify data was called. old data: ', data_string, 'new data: ', new_data)
+
             return new_data
         else:
             return data_string
@@ -113,57 +89,25 @@ class Employee(Agent):
     def __str__(self):
         return  type(self).__name__+str(self.unique_id) # this one is straight from the example. Might nog be necessary.
 
-
-
 class Autonomous (Employee):
-    """
-    Creates delay time and incorrectness
 
-    Attributes
-    __________
-    precision:
-        precision  of the employee
-
-    work_speed: int
-        the work_speed (in ticks) caused by this employee
-
-    """
     def __init__(self, unique_id, model, node_location = 'unknown', work_precision = 1, work_speed = 1):
         super().__init__(unique_id, model, node_location , work_precision, work_speed)
 
-
-
-
 class NonAutonomous (Employee):
-    """
-    Creates delay time and incorrectness
 
-    Attributes
-    __________
-    precision:
-        precision  of the employee
-
-    work_speed: int
-        the work_speed (in ticks) caused by this employee
-
-    approval: state
-        if the employee is allowed to continue sending information
-    """
     permission_counter = 0
-
 
     def __init__(self, unique_id, model, node_location = 'unknown', work_precision = 1, work_speed = 1,
                  parentX = None, parentY = None ):
         super().__init__(unique_id, model, node_location, work_precision, work_speed)
+        #the parents are the nodes of the incomming edges
         self.parents_updated_flag = False
         self.parentX = parentX
         self.parentY = parentY
-        #print('my parentx: ', self.parentX, 'parenty: ', self.parentY)
-
 
     def ask_permission(self, sender_of_info_pos):
         try:
-            #print('sender of info',sender_of_info_pos)
             if self.parentX == sender_of_info_pos:
                 receiver = self.parentY
             else:
@@ -181,7 +125,9 @@ class NonAutonomous (Employee):
             if agent:
                 self.model.schedule.add(agent)
                 self.model.space.place_agent(agent, sender_of_info_pos)
+
             NonAutonomous.permission_counter += 1
+
             if self.model.debug:
                 print('Permission request generated: ', name, 'Path of generated request:', path, ' By:', self.unique_id, ' loc:', self.pos, ' receiver:', receiver)
             return name
@@ -190,9 +136,7 @@ class NonAutonomous (Employee):
             print("An error, ", e, " has occured while atempting to create an information_permission.")
 
     def check_permission(self, info_permission_name):
-        #print('Checking Permission for ', self.unique_id, 'info perm: ', info_permission_name, 'work order:', self.work_order)
         #check if permission has returned and is now in work_order
-
         if info_permission_name in self.work_order:
             #print('check permission was successfully called')
             self.work_order.remove(info_permission_name)
@@ -201,21 +145,6 @@ class NonAutonomous (Employee):
             return False
 
 class Collector (Employee):
-    """
-    Creates delay time and incorrectness
-
-    Attributes
-    __________
-    precision:
-        precision  of the employee
-
-    work_speed: int
-        the work_speed (in ticks) caused by this employee
-
-    everything_collected
-        if all the information is collected
-    """
-
     def __init__(self, unique_id, model, node_location = 'unknown', work_precision = 1,
                  work_speed = 2, info_pack_required = 4, everything_collected = False):
         super().__init__(unique_id, model, node_location, work_precision, work_speed)
@@ -243,36 +172,13 @@ class Collector (Employee):
             return False
 
 class Controller (Employee):
-    """
-        Creates delay time and incorrectness
 
-        Attributes
-        __________
-        allow_sending
-            if all the information is collected
-
-        all_mistakes_encountered (dict)
-            stores every mistake found and the error margin.
-
-
-        Functions
-        ---------
-        check_data_pack()
-            checks if data is modified
-
-            input: current_data_pack, original_data_pack, and datapack_id
-            output: new_data_pack, time it took to process (e.g. steps or something)
-
-        """
     def __init__(self, unique_id, model, node_location = 'unknown', work_precision = 1, work_speed = 1, allow_sending = False):
         super().__init__(unique_id, model, node_location, work_precision, work_speed)
-        #self.allow_sending = allow_sending
         self.repair = True #this can later be changed if we want this or not...
 
     def check_data_pack(self, current_data_pack, orgininal_data_pack, data_pack_id):
-        #print(current_data_pack, orgininal_data_pack)
         if current_data_pack == orgininal_data_pack:
-            #self.allow_sending = True
             return current_data_pack, 15
 
         else:
@@ -296,18 +202,6 @@ class Controller (Employee):
 
 
 class Source (Employee):
-
-    """
-    Source creates new information packages and sends them
-
-    Attributes
-    ------------
-    info_frequency: int
-        Number of information packages created
-
-    info_pack_created: bool
-        True if created
-    """
 
     info_pack_created_flag = False
     counter = 0
@@ -333,8 +227,7 @@ class Source (Employee):
         distribution = distribution / max(distribution)  # Standadize all the vlues between 0 and 1.
         distribution = distribution * maxValue  # Multiply the standardized values by the maximum value.
         temp_time_process = int(np.random.choice(distribution))
-        #print('time to process: ', temp_time_process, 'type: ', type(temp_time_process))
-        #print('priority chance: ', self.priority_chance, 'type: ', type(self.priority_chance))
+
         try:
 
             if random.uniform(0.0, 1.0) < self.priority_chance:
@@ -344,7 +237,6 @@ class Source (Employee):
 
                 agent = Info_Regular('Info_regular_' + str(Source.counter), self.model, self, type_of_info='Regular',
                                      time_to_process=temp_time_process)
-            #print(agent)
             if agent:
 
                 self.model.schedule.add(agent)
@@ -352,30 +244,19 @@ class Source (Employee):
                 agent.set_path()
                 Source.counter += 1
                 self.info_pack_created_flag = True
-                # self.employee_count += 1
 
         except Exception as e:
             print("Something went wrong, ", e.__class__, "occurred while generating an info pack.", e)
             print(e)
 
 class Sink (Employee):
-    """
-        Removes information packages from the network
 
-        Attributes
-        __________
-        info_pack_removed: bool
-            True if removed
-    """
     info_pack_removed = False
 
     def remove(self, info_package):
 
         try:
-            #print('pos: ', info_package.pos)
-            #print('1', info_package.pos)
             self.model.space.remove_agent(info_package)
-            #print('2')
             self.model.schedule.remove(info_package)
             if self.model.debug:
                 print('Removed info_package, ', info_package.unique_id, 'from: ', info_package.pos)
@@ -383,47 +264,6 @@ class Sink (Employee):
         except Exception as e:
             print('Something went wrong while removing agent', info_package.unique_id, ' : ', e, 'Happened')
 
-
-
-#TODO Change order of and wording of the text below.
-"""
-    Attributes
-    __________
-    step_time: int
-        the number of minutes (or seconds) a tick represents
-        Used as a base to change unites
-
-    state: Enum (CONTINUE | WAIT)
-        state of the information
-
-    location: Employee
-        reference to the Infra where the information is located
-
-    path_ids: Series
-        the whole path (origin and destination) where the info shall go to
-        It consists the Infras' uniques IDs in a sequential order
-
-    location_index: int
-        a pointer to the current Infra in "path_ids" (above)
-        i.e. the id of self.location is self.path_ids[self.location_index]
-
-    waiting_time: int
-        the time the information needs to wait
-
-    generated_at_step: int
-        the timestamp (number of ticks) that the information is generated
-
-    removed_at_step: int
-        the timestamp (number of ticks) that the information is removed
-    
-    included_info_original: bit string
-        The data that is originally sent
-    
-    included_info: bit string
-        The current data set
-    ...
-
-    """
 class Info_package (Agent):
     step_time = 1
 
@@ -455,11 +295,6 @@ class Info_package (Agent):
         self.waiting_time = 0
         self.removed_at_step = None
 
-        #stuff to collect my data
-
-
-
-
     def __str__(self):
         return "Info_pack: " + str(self.unique_id) + '\n'+ \
                " +" + str(self.generated_at_step) + " -" + str(self.removed_at_step) + '\n'+ \
@@ -472,27 +307,17 @@ class Info_package (Agent):
 
 
     def step(self):
-
-        #print('Employee: ', self.location.unique_id, ' , Work order: ', self.location.work_order)
-        #print('ID: ', self.unique_id, 'pos: ', self.pos)
         self.location.determine_work_order(self.type_of_info, self.unique_id)
 
-        #storing data
         self.model.employee_step_business[0].append(self.model.schedule.steps)
         self.model.employee_step_business[1].append(self.location.unique_id)
         self.model.employee_step_business[2].append(self.location.info_package_count)
 
-        #if self.state == Info_package.State.CONTINUE:
-        #    self.move_to_next()
-
         # check if it's a collector
         if isinstance(self.location, Collector):
-            #print('collector was found')
             if self.location.everything_collected():
-                #print('why do I not get here?')
                 # check if you're in the everything collected or outside
                 if self.location.in_collection(self.unique_id):
-                    #print(self.unique_id, 'I was in collection and I am being sent')
                     self.state = Info_package.State.CONTINUE
                 else:
                     self.state = Info_package.State.WAIT
@@ -502,28 +327,19 @@ class Info_package (Agent):
         # if location is non_auto, continue when permission has returned!
         if isinstance(self.location, NonAutonomous):
             if not isinstance(self, Info_Permission):
-                # if self.employees_visited <= 1:
-                #    print('current location', self.location.unique_id)
-                #    print('I havent visited much')
-                #    self.State= Info_package.State.CONTINUE
+
                 if not self.permission_granted:
                     self.state = Info_package.State.WAIT
-                    #print('check permission for package: ', self.unique_id, 'permision request name: ',
-                    #      self.permission_request_name)
                     self.permission_granted = self.location.check_permission(self.permission_request_name)
 
-                    # print('do i get here???????????????????')
-                    # self.permission_granted = self.location.check_permission(self.permission_request_name)
                 if self.permission_granted:
-                    #print(self)
-                    # print('\n agents: ', self.schedule._agents)
                     if self.waiting_time < 1:
-                        #print('do i get here?')
                         self.state = Info_package.State.CONTINUE
                         self.permission_granted = False
                     else:
                         self.waiting_time = max(self.waiting_time - 1, 0)
                         self.state = Info_package.State.WAIT
+
         #for other employees types, check if it's the infopacks turn
         elif self.location.ready_to_send(self.unique_id):
             #if it is auto or controller's turn
@@ -535,7 +351,6 @@ class Info_package (Agent):
 
         if self.state == Info_package.State.CONTINUE:
             self.move_to_next()
-        #print(self)
 
     def move_to_next(self):
         if self.model.debug:
@@ -553,14 +368,9 @@ class Info_package (Agent):
                   'My path: ', self.path_ids)
             print('PATH TYPE: ', type(self.path_ids))
 
-
         # when at sink
         if isinstance(next_employee, Sink):
-            #print('\n Package going to be removed: ', self.unique_id, 'Removed at pos: ', self.pos, 'by employee: ', next_employee.unique_id)
-            #print('sink so send to next')
             self.arrive_at_next(next_employee)
-            #self.removed_at_step = self.model.schedule.steps
-            #self.location.remove(self)
             return
 
         if isinstance(next_employee, Autonomous):
@@ -568,7 +378,6 @@ class Info_package (Agent):
             self.waiting_time = next_employee.get_processing_time(self.time_to_process)
 
             if self.waiting_time > 0:
-                #wait at the next employee
                 self.arrive_at_next(next_employee)
                 self.State = Info_package.State.WAIT
                 return
@@ -578,12 +387,9 @@ class Info_package (Agent):
             self.data_pack = next_employee.get_new_data(self.data_pack)
             self.waiting_time = next_employee.get_processing_time(self.time_to_process)
             if self.type_of_info != 'Permission':
-
                 self.permission_request_name = next_employee.ask_permission(self.location.pos)
-                #print('permission request name', self.permission_request_name)
 
             if self.waiting_time > 0:
-                # wait at the next employee
                 self.arrive_at_next(next_employee)
                 self.State = Info_package.State.WAIT
                 return
@@ -593,9 +399,7 @@ class Info_package (Agent):
             self.data_pack = next_employee.get_new_data(self.data_pack)
             self.waiting_time = next_employee.get_processing_time(self.time_to_process)
 
-
             if self.waiting_time > 0:
-                # wait at the next employee
                 self.arrive_at_next(next_employee)
                 self.State = Info_package.State.WAIT
                 return
@@ -617,8 +421,6 @@ class Info_package (Agent):
 
     def arrive_at_next(self, next_employee):
         next_node = self.path_ids[self.location_index]
-        #print(self.unique_id, ' is moving to next', next_node)
-
         self.location.work_order.remove(self.unique_id)
         self.employees_visited +=1
         self.location.info_package_processed += 1
@@ -631,11 +433,10 @@ class Info_package (Agent):
         if isinstance(next_employee, Sink):
             if self.model.debug:
                 print('\n Package going to be removed: ', self.unique_id, 'Removed at pos: ', self.pos, 'by employee: ', next_employee.unique_id)
-            #print('sink so send to next')
-            #self.arrive_at_next(next_employee)
 
             self.removed_at_step = self.model.schedule.steps
-            #print("REMOVED", self.unique_id, "at sink: ", self.location.unique_id)
+
+            #store data
             self.model.info_pack_travel_data[0].append(self.unique_id)
             self.model.info_pack_travel_data[1].append(self.generated_at_step)
             self.model.info_pack_travel_data[2].append(self.removed_at_step)
@@ -648,6 +449,8 @@ class Info_package (Agent):
                 if self.data_pack[i] != self.data_pack_original[i]:
                     temp_mistakes += 1
             error_percentage = (temp_mistakes/len(self.data_pack_original))*100
+
+            #store data
             self.model.info_pack_data_data[0].append(self.unique_id)
             self.model.info_pack_data_data[1].append(self.data_pack_original)
             self.model.info_pack_data_data[2].append(self.data_pack)
@@ -659,9 +462,7 @@ class Info_package (Agent):
         if self.model.debug:
             print('Work order of next employee: ', next_employee.unique_id, next_employee.work_order)
 
-        #print(self)
         if isinstance(self, Info_Permission):
-            #print('next_employee.pos: ', next_employee.pos, self.permission_generated_pos)
             if next_employee.pos == self.permission_generated_pos:
 
                 if self.model.debug:
@@ -670,14 +471,11 @@ class Info_package (Agent):
                 try:
                     self.model.space.remove_agent(self)
                     self.model.schedule.remove(self)
-                    #self.location.work_order.remove(self.unique_id)
                     if self.model.debug:
                         print('Removed info_package, ', self.unique_id, 'from: ', self.pos)
 
                 except Exception as e:
                     print('Something went wrong while removing agent', self.unique_id, ' : ', e, 'Happened')
-        #move to the next node in the graph from the path
-#test
 
 class Info_Regular (Info_package):
     pass

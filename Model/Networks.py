@@ -20,15 +20,12 @@ def draw_graph(G, title = 'No Title Given', scenario=None):
         ax.set_title(title, fontsize=25)
         ax.axis('off')
 
-
     except:
         fig, ax = plt.subplots(figsize=(25 / 2.54, 30 / 2.54), dpi=120)
         pos = nx.spring_layout(G)
         nx.draw_networkx(G, pos=pos, with_labels=True, node_size=400, ax=ax)
         ax.set_title(title, fontsize=25)
         ax.axis('off')
-
-
     plt.show()
 
 def draw_graph(G, title = 'No Title Given', scenario=None, file_name ='None given'):
@@ -39,8 +36,6 @@ def draw_graph(G, title = 'No Title Given', scenario=None, file_name ='None give
         nx.draw_networkx(G, pos = pos, with_labels=True, node_size = 400, ax=ax)
         ax.set_title(title, fontsize=25)
         ax.axis('off')
-
-
     except:
         fig, ax = plt.subplots(figsize=(25 / 2.54, 30 / 2.54), dpi=120)
         pos = nx.spring_layout(G)
@@ -59,14 +54,11 @@ def get_network_statistics(G):
     sink_nodes, source_nodes = count_sink_source_nodes(G)
     in_degrees = dict(G.in_degree)
     out_degrees = dict(G.out_degree)
-    avg_in_degree = sum(in_degrees.values()) / float(len(G))  # TODO divide by len(G) or by len(in_degrees)?
+    avg_in_degree = sum(in_degrees.values()) / float(len(G))
     avg_out_degree = sum(out_degrees.values()) / float(len(G))
     density = nx.density(G)
     trophic_incoherence_parameter = tropA.trophic_incoherence_parameter(G)
     average_shortest_path = nx.average_shortest_path_length(G)
-    # eigenvector_centrality =
-    # betweenness_centrality =
-    # avg_shortest_path =
     return num_nodes, num_edges, len(sink_nodes), len(source_nodes),avg_in_degree, avg_out_degree, density, trophic_incoherence_parameter ,average_shortest_path # , eigenvector_centrality, betweenness_centrality, avg_shortest_path
 
 def write_results_to_file(file = '../Results/network_stats.txt', G=None, seed=None, prob = None, num_empl_auto = None,
@@ -122,6 +114,7 @@ def count_sink_source_nodes(G):
 
     return sink_nodes, source_nodes
 
+#this function checks for every source in the network if there is a path to at least one sink
 def check_if_source_connected_to_one_sink(G):
     sink_nodes, source_nodes = count_sink_source_nodes(G) #get list of source and sink nodes in network
     everything_has_a_path = 0
@@ -130,7 +123,6 @@ def check_if_source_connected_to_one_sink(G):
         for j in range(len(sink_nodes)):
             try:
                 path2 = next(nx.all_simple_paths(G, source=source_nodes[i], target=sink_nodes[j]))
-                print(path2)#todo rmeove print later
 
             except Exception as e:
                 path2 = None
@@ -138,11 +130,11 @@ def check_if_source_connected_to_one_sink(G):
             if path2 is not None:
                 everything_has_a_path +=1
                 break
-        print(everything_has_a_path) #todo rmeove print later
     if everything_has_a_path == len(source_nodes):
         return True
     else:
         return False
+
 
 def create_graph_from_source(edgelist, nodeattributes):
     G = nx.DiGraph()
@@ -163,13 +155,9 @@ def create_graph_from_source(edgelist, nodeattributes):
 
     return G
 
-""" - Create_random_graph()
-
-        
-"""
-
+#This function generates the random graph.
 def create_random_graph(num_nodes, seed, trophic_incoherence, scenario, probability):
-    printing_graphs = False
+    printing_graphs = False #if the graphs that are being generated have to be printed at every change step
     t0 = time.time()
     new_num_nodes = num_nodes
     used_seed = seed
@@ -183,11 +171,8 @@ def create_random_graph(num_nodes, seed, trophic_incoherence, scenario, probabil
             if printing_graphs:
                 draw_graph(G, '(1) Before connecting loose nodes', scenario)
             #CONNECT all loose nodes randomly
-
+            # this creates basically sinks, it will be fixed in the next step
             isolates = list(nx.isolates(G))
-            #print("Isolates: ", isolates)
-
-            #this creates basically sinks, it will be fixed in the next step
             while len(list(nx.isolates(G))) != 0:
                 rand_isolate = np.random.choice(isolates)
                 isolates.remove(rand_isolate)
@@ -198,11 +183,11 @@ def create_random_graph(num_nodes, seed, trophic_incoherence, scenario, probabil
                 G.add_edge(rand_node, rand_isolate)
 
             #make sure it is ONE BIG weakly connected component
-            #print("Number of weakly_connected_components: ", nx.number_weakly_connected_components(G))
-            #print(list(nx.weakly_connected_components(G)))
             if printing_graphs:
                 draw_graph(G, '(2) After connecting loose nodes', scenario)
 
+            #check if somethin gis not weakly connected
+            #then repair
             if not nx.is_weakly_connected(G):
 
                 weakly_connect_list = list(nx.weakly_connected_components(G))
@@ -219,39 +204,33 @@ def create_random_graph(num_nodes, seed, trophic_incoherence, scenario, probabil
                     else:
                         G.add_edge(rand_node_set, rand_node)
 
-            #CHECK number of source and sink
+
+
+            # CHECK number of source and sink
+            #CECK if source > 15% of all nodes, if so connect the remaining nodes
+
             sink_nodes, source_nodes = count_sink_source_nodes(G)
             if printing_graphs:
                 draw_graph(G, '(3) After connecting loose components', scenario)
-            #CECK if source > 15% of all nodes, if so connect the remaining nodes
-            #print("Num. of nodes: ", len(G.nodes), "source: ", source_nodes, "Sink: ", sink_nodes)
+
             while len(source_nodes)/len(G.nodes) >= 0.15:
-                #print("Percentage source found: ", (len(source_nodes)/len(G.nodes)))
                 rand_source = np.random.choice(source_nodes)
                 source_nodes.remove(rand_source)
                 rand_node = np.random.choice(source_nodes)
-
-                #while rand_source == rand_node or rand_node in source_nodes :
-                #    rand_node = np.random.choice((G.nodes))
                 G.add_edge(rand_node, rand_source)
             if printing_graphs:
                 draw_graph(G, '(4) After connecting source nodes', scenario)
+
             # CECK if sink > 15% of all nodes, if so connect the remaining nodes
             while len(sink_nodes)/len(G.nodes) >= 0.15:
-                #print("Percentage sinks found: ", (len(sink_nodes)/len(G.nodes)))
                 rand_sink = np.random.choice(sink_nodes)
                 sink_nodes.remove(rand_sink)
                 rand_node = np.random.choice(sink_nodes)
-
-                #while rand_sink == rand_node or rand_node in sink_nodes :
-                #    rand_node = np.random.choice((G.nodes))
                 G.add_edge(rand_sink, rand_node)
 
             if printing_graphs:
                 draw_graph(G, '(5) After connecting sink nodes', scenario)
             sink_nodes, source_nodes = count_sink_source_nodes(G)
-            #print("Num. of nodes: ", len(G.nodes), "source: ", source_nodes, "Sink: ", sink_nodes)
-            #print("Number of weakly_connected_components: ", nx.number_weakly_connected_components(G))
 
             try:
                 trop = tropA.trophic_incoherence_parameter(G)
