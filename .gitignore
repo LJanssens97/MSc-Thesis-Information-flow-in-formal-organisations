@@ -1,0 +1,94 @@
+
+main.py
+.idea/.name
+*.xml
+*.iml
+.ipynb_checkpoints/testing_stuff-checkpoint.ipynb
+Experiments/.ipynb_checkpoints/Graph Experiments-Laptop-Luka-checkpoint.ipynb
+Experiments/Graph Experiments-Laptop-Luka.ipynb
+Experiments/__pycache__/TrophicAddapted.cpython-39.pyc
+Experiments/__pycache__/TrophicAddapted.cpython-38.pyc
+Experiments/__pycache__/TrophicAddapted.cpython-310.pyc
+Experiments/.ipynb_checkpoints/Processing Results-checkpoint.ipynb
+*.pyc
+Results/.ipynb_checkpoints/Processing_Results-checkpoint.ipynb
+Results/.ipynb_checkpoints/processing_results_iterations - big networks-checkpoint.ipynb
+Results/.ipynb_checkpoints/processing_results_iterations - big_networks-checkpoint.ipynb
+Results/.ipynb_checkpoints/processing_results_iterations - data_model-checkpoint.ipynb
+Results/.ipynb_checkpoints/processing_results_iterations - new data-checkpoint.ipynb
+Results/.ipynb_checkpoints/processing_results_iterations-checkpoint.ipynb
+Results/Networks/network_stats-Laptop-Luka.txt
+Results/.ipynb_checkpoints/random_modelledemployee_step_business_date_2022-09-18 21-35-37_scenario0-checkpoint.csv
+Results/data_modelled/controller_data_date_2022-09-30 12-16-31.csv
+Results/data_modelled/employee_data_date_2022-09-30 12-16-31.csv
+Results/data_modelled/employee_step_business_date_2022-09-30 12-16-31.csv
+Results/data_modelled/employee_step_business_date_2022-09-30 12-16-31.csv
+Results/data_modelled/info_df_networks_date_2022-09-30 12-16-31.csv
+Results/data_modelled/info_df_networks_date_2022-09-30 12-16-31.csv
+Results/data_modelled/info_pack_data_data_date_2022-09-30 12-16-31.csv
+Results/graph creation/(1) raw graph.png
+Results/data_modelled/info_pack_travel_data_date_2022-09-30 12-16-31.csv
+Results/graph creation/(2) connecting loose nodes.png
+*.png
+Results/Used_Results/.ipynb_checkpoints/random_modelled-df_networks_date_2022-09-30 07-57-30-checkpoint.csv
+Results/Used_Results/data_modelled/controller_data_date_2022-09-30 12-16-31.csv
+Results/Used_Results/data_modelled/controller_data_date_2022-09-30 12-16-31.csv
+Results/Used_Results/data_modelled/employee_data_date_2022-09-30 12-16-31.csv
+Results/Used_Results/data_modelled/employee_data_date_2022-09-30 12-16-31.csv
+Results/Used_Results/data_modelled/employee_step_business_date_2022-09-30 12-16-31.csv
+Results/Used_Results/data_modelled/info_df_networks_date_2022-09-30 12-16-31.csv
+Results/Used_Results/data_modelled/info_pack_data_data_date_2022-09-30 12-16-31.csv
+Results/Used_Results/data_modelled/info_pack_travel_data_date_2022-09-30 12-16-31.csv
+Results/Used_Results/Making Tables with results.xlsx
+Results/Used_Results/Making Tables with results.xlsx
+Results/Used_Results/random_modelled-controller_data_date_2022-09-28 08-12-46.csv
+Results/Used_Results/random_modelled-controller_data_date_2022-09-28 08-12-46.csv
+Results/Used_Results/random_modelled-controller_data_date_2022-09-28 09-03-13.csv
+Results/Used_Results/random_modelled-controller_data_date_2022-09-28 09-03-13.csv
+Results/Used_Results/random_modelled-controller_data_date_2022-09-28 12-34-15.csv
+Results/Used_Results/random_modelled-controller_data_date_2022-09-28 12-34-15.csv
+Results/Used_Results/random_modelled-controller_data_date_2022-09-28 22-43-26.csv
+Results/Used_Results/random_modelled-controller_data_date_2022-09-30 07-57-30.csv
+Results/Used_Results/random_modelled-controller_data_date_2022-09-30 07-57-30.csv
+Results/Used_Results/random_modelled-df_networks_date_2022-09-28 08-12-46.csv
+Results/processing_results_iterations - new data.ipynb
+Results/Used_Results/random_modelled-df_networks_date_2022-09-28 09-03-13.csv
+Results/Used_Results/random_modelled-df_networks_date_2022-09-28 12-34-15.csv
+Results/Used_Results/random_modelled-df_networks_date_2022-09-28 12-34-15.csv
+Results/Used_Results/random_modelled-df_networks_date_2022-09-28 22-43-26.csv
+Results/Used_Results/random_modelled-df_networks_date_2022-09-30 07-57-30.csv
+Results/Used_Results/random_modelled-employee_data_date_2022-09-28 08-12-46.csv
+Results/Used_Results/random_modelled-employee_data_date_2022-09-28 08-12-46.csv
+Results/Used_Results/random_modelled-employee_data_date_2022-09-28 09-03-13.csv
+Results/Used_Results/random_modelled-employee_data_date_2022-09-28 12-34-15.csv
+Results/Used_Results/random_modelled-employee_data_date_2022-09-28 12-34-15.csv
+Results/Used_Results/random_modelled-employee_data_date_2022-09-28 22-43-26.csv
+Results/Used_Results/random_modelled-employee_data_date_2022-09-28 22-43-26.csv
+Results/Used_Results/random_modelled-employee_data_date_2022-09-30 07-57-30.csv
+Results/Used_Results/random_modelled-employee_step_business_date_2022-09-28 08-12-46.csv
+Results/Used_Results/random_modelled-employee_step_business_date_2022-09-28 08-12-46.csv
+Results/Used_Results/random_modelled-employee_step_business_date_2022-09-28 09-03-13.csv
+Results/Used_Results/random_modelled-employee_step_business_date_2022-09-28 12-34-15.csv
+Results/Used_Results/random_modelled-employee_step_business_date_2022-09-28 12-34-15.csv
+Results/Used_Results/results.zip
+Results/Used_Results/random_modelled-employee_step_business_date_2022-09-28 22-43-26.csv
+Results/Used_Results/random_modelled-employee_step_business_date_2022-09-30 07-57-30.csv
+*.ipynb
+Results/Used_Results/random_modelled-info_pack_data_data_date_2022-09-28 08-12-46.csv
+Results/Used_Results/random_modelled-info_pack_data_data_date_2022-09-28 09-03-13.csv
+Results/Used_Results/random_modelled-info_pack_data_data_date_2022-09-28 12-34-15.csv
+Results/Used_Results/random_modelled-info_pack_data_data_date_2022-09-28 22-43-26.csv
+Results/Used_Results/random_modelled-info_pack_data_data_date_2022-09-30 07-57-30.csv
+Results/Used_Results/random_modelled-info_pack_travel_data_date_2022-09-28 08-12-46.csv
+Results/Used_Results/random_modelled-info_pack_travel_data_date_2022-09-28 09-03-13.csv
+Results/Used_Results/random_modelled-info_pack_travel_data_date_2022-09-28 12-34-15.csv
+Results/Used_Results/random_modelled-info_pack_travel_data_date_2022-09-28 22-43-26.csv
+Results/Used_Results/random_modelled-info_pack_travel_data_date_2022-09-30 07-57-30.csv
+Data/Scenarios - N25 priority experiments.csv
+Data/Scenarios - N250 priority experiments - first half.csv
+Data/Scenarios - N250 priority experiments - second half.csv
+Data/Scenarios - collector analysis.csv
+Data/Scenarios - case study.csv
+Data/updated-graph-edges.csv
+Data/node_data.csv
+Results/Networks/network_stats.txt
